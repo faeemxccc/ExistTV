@@ -18,7 +18,26 @@ export function Player({ url }: PlayerProps) {
     const [showControls, setShowControls] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // New State
+    const [levels, setLevels] = useState<{ height: number; bitrate: number }[]>([]);
+    const [currentLevel, setCurrentLevel] = useState<number>(-1); // -1 = Auto
+    const [showQualityMenu, setShowQualityMenu] = useState(false);
+    const [isHoveringControls, setIsHoveringControls] = useState(false);
+    const [showSpinner, setShowSpinner] = useState(false);
+
     let controlsTimeout: NodeJS.Timeout;
+
+    // Buffering Logic with Delay
+    useEffect(() => {
+        let timeout: NodeJS.Timeout;
+        if (loading) {
+            timeout = setTimeout(() => setShowSpinner(true), 4000);
+        } else {
+            setShowSpinner(false);
+        }
+        return () => clearTimeout(timeout);
+    }, [loading]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -27,6 +46,8 @@ export function Player({ url }: PlayerProps) {
         setLoading(true);
         setError(null);
         setIsPlaying(false);
+        setLevels([]);
+        setCurrentLevel(-1);
 
         if (Hls.isSupported()) {
             if (hlsRef.current) {
@@ -41,8 +62,13 @@ export function Player({ url }: PlayerProps) {
 
             hls.loadSource(url);
             hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+
+            hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
                 setLoading(false);
+                // Populate levels
+                const availableLevels = data.levels.map(l => ({ height: l.height, bitrate: l.bitrate }));
+                setLevels(availableLevels);
+
                 video.play().catch(() => {
                     setIsPlaying(false);
                 });
@@ -86,7 +112,7 @@ export function Player({ url }: PlayerProps) {
                 setIsPlaying(true);
             });
             video.addEventListener('error', (e) => {
-                setError('Native playback error');
+                // setError('Native playback error'); // removed to be less intrusive
                 console.error(e);
             });
         }
@@ -141,7 +167,25 @@ export function Player({ url }: PlayerProps) {
     const handleMouseMove = () => {
         setShowControls(true);
         clearTimeout(controlsTimeout);
-        controlsTimeout = setTimeout(() => setShowControls(false), 3000);
+        if (!isHoveringControls) {
+            controlsTimeout = setTimeout(() => setShowControls(false), 3000);
+        }
+    };
+
+    // Reset timeout when leaving controls
+    useEffect(() => {
+        if (!isHoveringControls && showControls) {
+            controlsTimeout = setTimeout(() => setShowControls(false), 3000);
+        }
+        return () => clearTimeout(controlsTimeout);
+    }, [isHoveringControls, showControls]);
+
+    const changeQuality = (levelIndex: number) => {
+        if (hlsRef.current) {
+            hlsRef.current.currentLevel = levelIndex;
+            setCurrentLevel(levelIndex);
+            setShowQualityMenu(false);
+        }
     };
 
     return (
@@ -157,9 +201,10 @@ export function Player({ url }: PlayerProps) {
                 onClick={togglePlay}
                 playsInline
             />
-            {/* Loading Spinner */}
-            {loading && !error && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10 backdrop-blur-sm">
+
+            {/* Loading Spinner - Conditional with Delay & No Blur */}
+            {showSpinner && !error && (
+                <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
                     <div className="relative">
                         <div className="absolute inset-0 bg-[#F72585] blur-xl opacity-20 animate-pulse" />
                         <Loader2 className="h-12 w-12 text-[#F72585] animate-spin relative z-10" />
@@ -182,10 +227,14 @@ export function Player({ url }: PlayerProps) {
             )}
 
             {/* Modern Glass Controls */}
-            <div className={cn(
-                "absolute bottom-0 left-0 right-0 p-6 transition-all duration-500 bg-gradient-to-t from-black/90 via-black/50 to-transparent",
-                showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            )}>
+            <div
+                className={cn(
+                    "absolute bottom-0 left-0 right-0 p-6 transition-all duration-500 bg-gradient-to-t from-black/90 via-black/50 to-transparent",
+                    showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                )}
+                onMouseEnter={() => setIsHoveringControls(true)}
+                onMouseLeave={() => setIsHoveringControls(false)}
+            >
                 <div className="flex flex-col gap-4">
                     {/* Progress Bar (Visual Only for Livestreams usually) */}
                     <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
@@ -223,7 +272,46 @@ export function Player({ url }: PlayerProps) {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 relative">
+                            {/* Quality Selector */}
+                            {levels.length > 0 && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowQualityMenu(!showQualityMenu)}
+                                        className="p-2 text-[#A29BFE] hover:bg-white/10 rounded-full transition-colors"
+                                        title="Quality"
+                                    >
+                                        <Settings className="h-5 w-5" />
+                                    </button>
+
+                                    {showQualityMenu && (
+                                        <div className="absolute bottom-full mb-2 right-0 bg-black/90 border border-white/10 rounded-lg overflow-hidden min-w-[120px] backdrop-blur-md shadow-xl">
+                                            <button
+                                                onClick={() => changeQuality(-1)}
+                                                className={cn(
+                                                    "w-full px-4 py-2 text-left text-sm hover:bg-white/10 transition-colors",
+                                                    currentLevel === -1 ? "text-[#F72585] font-bold" : "text-white"
+                                                )}
+                                            >
+                                                Auto
+                                            </button>
+                                            {levels.map((level, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => changeQuality(index)}
+                                                    className={cn(
+                                                        "w-full px-4 py-2 text-left text-sm hover:bg-white/10 transition-colors",
+                                                        currentLevel === index ? "text-[#F72585] font-bold" : "text-white"
+                                                    )}
+                                                >
+                                                    {level.height}p
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <button onClick={() => hlsRef.current?.recoverMediaError()} className="p-2 text-[#A29BFE] hover:bg-white/10 rounded-full transition-colors" title="Reload Stream">
                                 <RotateCcw className="h-5 w-5" />
                             </button>

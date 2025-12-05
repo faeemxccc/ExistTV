@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, Star, Tv, Filter, ChevronDown } from 'lucide-react';
+import { Search, Star, Tv, Filter, ChevronDown, Check } from 'lucide-react';
 import { Channel } from '@/utils/m3u-parser';
 import { cn } from '@/lib/utils';
-
+import { getCode } from 'country-list';
 
 interface SidebarProps {
     channels: Channel[];
@@ -15,32 +15,85 @@ interface SidebarProps {
     className?: string;
 }
 
+// Helper to get emoji flag from country code
+function getFlagEmoji(countryCode: string) {
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+}
+
 export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteIds = new Set(), onToggleFavorite, className }: SidebarProps) {
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
+    const [selectedCountry, setSelectedCountry] = useState<string>('All');
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [isCountryOpen, setIsCountryOpen] = useState(false);
     const [limit, setLimit] = useState(50);
 
     const [showFavorites, setShowFavorites] = useState(false);
 
     const categories = useMemo(() => {
-        const unique = new Set(channels.map(c => c.category));
-        return ['All', ...Array.from(unique).sort()];
+        const counts = channels.reduce((acc, c) => {
+            acc[c.category] = (acc[c.category] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const unique = Object.keys(counts).sort();
+        return [
+            { name: 'All', count: channels.length },
+            ...unique.map(cat => ({ name: cat, count: counts[cat] }))
+        ];
     }, [channels]);
+
+    const countries = useMemo(() => {
+        // Filter countries based on selected category first (dependent dropdown)
+        const relevantChannels = selectedCategory === 'All'
+            ? channels
+            : channels.filter(c => c.category === selectedCategory);
+
+        const counts = relevantChannels.reduce((acc, c) => {
+            if (c.country && c.country !== 'Unknown') {
+                acc[c.country] = (acc[c.country] || 0) + 1;
+            }
+            return acc;
+        }, {} as Record<string, number>);
+
+        const unique = Object.keys(counts).sort();
+        return [
+            { name: 'All', count: relevantChannels.length, code: '' },
+            ...unique.map(name => {
+                const code = getCode(name) || '';
+                return { name: name, count: counts[name], code: code };
+            })
+        ];
+    }, [channels, selectedCategory]);
 
     const matchedChannels = useMemo(() => {
         return channels.filter((c) => {
             const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
             const matchesCategory = selectedCategory === 'All' || c.category === selectedCategory;
+            const matchesCountry = selectedCountry === 'All' || c.country === selectedCountry;
             const matchesFavorite = !showFavorites || favoriteIds.has(c.id);
-            return matchesSearch && matchesCategory && matchesFavorite;
+            return matchesSearch && matchesCategory && matchesCountry && matchesFavorite;
         });
-    }, [channels, search, selectedCategory, showFavorites, favoriteIds]);
+    }, [channels, search, selectedCategory, selectedCountry, showFavorites, favoriteIds]);
 
     const visibleChannels = useMemo(() => {
         return matchedChannels.slice(0, limit);
     }, [matchedChannels, limit]);
 
+    // Only show categories if there are more than just "All" and "Uncategorized" (or 1 real category)
+    // Actually, if we use country list, categories usually become just "Uncategorized"
+    // So if categories.length <= 2, we might want to hide it
+    // But let's check if the 'Uncategorized' count is basically everything.
+    const showCategoryFilter = categories.length > 2;
+
+    const currentCountryFlag = selectedCountry !== 'All'
+        ? getFlagEmoji(getCode(selectedCountry) || '')
+        : '🌍';
+    // Default globe for All
 
     return (
         <aside
@@ -68,39 +121,103 @@ export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteId
                         placeholder="Search channels..."
                         className="w-full h-10 rounded-lg bg-[#ffffff]/5 pl-9 pr-4 text-sm text-[#EAEAEA] outline-none focus:ring-1 focus:ring-[#F72585] border border-transparent placeholder:text-gray-500"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                            setLimit(50);
+                        }}
                     />
                 </div>
 
+                {/* Category Filter - Conditionally Rendered */}
+                {showCategoryFilter && (
+                    <div className="relative">
+                        <Filter className="absolute left-3 top-2.5 h-4 w-4 text-[#A29BFE] z-10" />
+                        <button
+                            onClick={() => { setIsCategoryOpen(!isCategoryOpen); setIsCountryOpen(false); }}
+                            className="w-full h-10 rounded-lg bg-[#ffffff]/5 pl-9 pr-4 text-sm text-[#EAEAEA] text-left outline-none focus:ring-1 focus:ring-[#3A0CA3] border border-transparent flex items-center justify-between group"
+                        >
+                            <span className="truncate mr-2">{selectedCategory}</span>
+                            <ChevronDown className={cn("h-4 w-4 text-[#A29BFE] transition-transform flex-shrink-0", isCategoryOpen && "rotate-180")} />
+                        </button>
+
+                        {isCategoryOpen && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setIsCategoryOpen(false)} />
+                                <div className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-lg bg-[#0F0E17] border border-[#3A0CA3]/50 shadow-xl z-20 scrollbar-thin scrollbar-thumb-[#F72585]">
+                                    {categories.map((category) => (
+                                        <button
+                                            key={category.name}
+                                            onClick={() => {
+                                                setSelectedCategory(category.name);
+                                                setSelectedCountry('All'); // Reset country when category changes
+                                                setIsCategoryOpen(false);
+                                                setLimit(50);
+                                            }}
+                                            className={cn(
+                                                "w-full text-left px-4 py-2 text-sm transition-colors flex items-center justify-between",
+                                                selectedCategory === category.name
+                                                    ? "bg-[#3A0CA3] text-white"
+                                                    : "text-[#EAEAEA] hover:bg-[#A29BFE]/10"
+                                            )}
+                                        >
+                                            <span className="truncate mr-2">{category.name}</span>
+                                            <span className={cn(
+                                                "text-xs flex-shrink-0",
+                                                selectedCategory === category.name ? "text-white/70" : "text-[#A29BFE]"
+                                            )}>
+                                                {category.count}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Country Filter */}
                 <div className="relative">
-                    <Filter className="absolute left-3 top-2.5 h-4 w-4 text-[#A29BFE] z-10" />
+                    <div className="absolute left-3 top-2.5 flex items-center justify-center w-5 h-5 pointer-events-none z-10">
+                        <span className="text-lg leading-none">{currentCountryFlag}</span>
+                    </div>
                     <button
-                        onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                        className="w-full h-10 rounded-lg bg-[#ffffff]/5 pl-9 pr-4 text-sm text-[#EAEAEA] text-left outline-none focus:ring-1 focus:ring-[#3A0CA3] border border-transparent flex items-center justify-between"
+                        onClick={() => { setIsCountryOpen(!isCountryOpen); setIsCategoryOpen(false); }}
+                        className="w-full h-10 rounded-lg bg-[#ffffff]/5 pl-10 pr-3 text-sm text-[#EAEAEA] text-left outline-none focus:ring-1 focus:ring-[#3A0CA3] border border-transparent flex items-center justify-between group overflow-hidden"
                     >
-                        <span className="truncate">{selectedCategory}</span>
-                        <ChevronDown className={cn("h-4 w-4 text-[#A29BFE] transition-transform", isCategoryOpen && "rotate-180")} />
+                        {/* Added min-w-0 to allow truncation within flex child */}
+                        <span className="truncate min-w-0 flex-1 mr-2">{selectedCountry === 'All' ? 'All Countries' : selectedCountry}</span>
+                        <ChevronDown className={cn("h-4 w-4 text-[#A29BFE] transition-transform flex-shrink-0", isCountryOpen && "rotate-180")} />
                     </button>
 
-                    {isCategoryOpen && (
+                    {isCountryOpen && (
                         <>
-                            <div className="fixed inset-0 z-10" onClick={() => setIsCategoryOpen(false)} />
+                            <div className="fixed inset-0 z-10" onClick={() => setIsCountryOpen(false)} />
                             <div className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-lg bg-[#0F0E17] border border-[#3A0CA3]/50 shadow-xl z-20 scrollbar-thin scrollbar-thumb-[#F72585]">
-                                {categories.map((category) => (
+                                {countries.map((country) => (
                                     <button
-                                        key={category}
+                                        key={country.name}
                                         onClick={() => {
-                                            setSelectedCategory(category);
-                                            setIsCategoryOpen(false);
+                                            setSelectedCountry(country.name);
+                                            setIsCountryOpen(false);
+                                            setLimit(50);
                                         }}
                                         className={cn(
-                                            "w-full text-left px-4 py-2 text-sm transition-colors",
-                                            selectedCategory === category
+                                            "w-full text-left px-3 py-2 text-sm transition-colors flex items-center justify-between gap-2",
+                                            selectedCountry === country.name
                                                 ? "bg-[#3A0CA3] text-white"
                                                 : "text-[#EAEAEA] hover:bg-[#A29BFE]/10"
                                         )}
                                     >
-                                        {category}
+                                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                                            <span className="text-base flex-shrink-0">{country.code ? getFlagEmoji(country.code) : '🌍'}</span>
+                                            <span className="truncate">{country.name === 'All' ? 'All Countries' : country.name}</span>
+                                        </div>
+                                        <span className={cn(
+                                            "text-xs flex-shrink-0",
+                                            selectedCountry === country.name ? "text-white/70" : "text-[#A29BFE]"
+                                        )}>
+                                            {country.count}
+                                        </span>
                                     </button>
                                 ))}
                             </div>

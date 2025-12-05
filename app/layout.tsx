@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Stream the World Without Limits",
   icons: {
     icon: "/logo.svg",
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
   },
 };
 
