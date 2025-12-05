@@ -10,7 +10,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 w-full z-50 bg-[#0F0E17]/80 backdrop-blur-md border-b border-[#A29BFE]/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Tv className="h-8 w-8 text-[#F72585]" />
+            <img src="/logo.svg" className="h-8 w-8 text-[#F72585]" alt="ExistTV" />
             <span className="text-2xl font-bold bg-gradient-to-r from-[#F72585] to-[#A29BFE] bg-clip-text text-transparent">
               ExistTV
             </span>
