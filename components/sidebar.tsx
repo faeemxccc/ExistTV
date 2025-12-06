@@ -15,13 +15,10 @@ interface SidebarProps {
     className?: string;
 }
 
-// Helper to get emoji flag from country code
-function getFlagEmoji(countryCode: string) {
-    const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
+// Helper to get flag image URL
+function getFlagUrl(countryCode: string) {
+    if (!countryCode) return '';
+    return `https://flagcdn.com/w40/${countryCode.toLowerCase()}.png`;
 }
 
 export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteIds = new Set(), onToggleFavorite, className }: SidebarProps) {
@@ -90,9 +87,7 @@ export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteId
     // But let's check if the 'Uncategorized' count is basically everything.
     const showCategoryFilter = categories.length > 2;
 
-    const currentCountryFlag = selectedCountry !== 'All'
-        ? getFlagEmoji(getCode(selectedCountry) || '')
-        : '🌍';
+    const selectedCountryCode = selectedCountry !== 'All' ? getCode(selectedCountry) : null;
     // Default globe for All
 
     return (
@@ -100,7 +95,7 @@ export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteId
             className={cn(
                 'flex flex-col bg-[#0F0E17] transition-all duration-300 ease-in-out',
                 'w-full md:w-72',
-                'h-[500px] md:h-full', // Fixed height for mobile list or full height for desktop
+                'h-full', // Take available height from parent (which calculates flex)
                 'order-2 md:order-1',   // Mobile: Bottom, Desktop: Left
                 'border-t md:border-t-0 border-[#A29BFE]/20 md:border-r', // Mobile: Top border, Desktop: Right border
                 className
@@ -178,7 +173,11 @@ export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteId
                 {/* Country Filter */}
                 <div className="relative">
                     <div className="absolute left-3 top-2.5 flex items-center justify-center w-5 h-5 pointer-events-none z-10">
-                        <span className="text-lg leading-none">{currentCountryFlag}</span>
+                        {selectedCountryCode ? (
+                            <img src={getFlagUrl(selectedCountryCode)} alt={selectedCountry} className="w-5 h-3.5 object-contain shadow-sm" />
+                        ) : (
+                            <span className="text-lg leading-none">🌍</span>
+                        )}
                     </div>
                     <button
                         onClick={() => { setIsCountryOpen(!isCountryOpen); setIsCategoryOpen(false); }}
@@ -209,7 +208,13 @@ export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteId
                                         )}
                                     >
                                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                                            <span className="text-base flex-shrink-0">{country.code ? getFlagEmoji(country.code) : '🌍'}</span>
+                                            <span className="flex-shrink-0 flex items-center justify-center w-5 text-center">
+                                                {country.code ? (
+                                                    <img src={getFlagUrl(country.code)} alt={country.name} className="w-5 h-3.5 object-contain shadow-sm" />
+                                                ) : (
+                                                    <span className="text-base">🌍</span>
+                                                )}
+                                            </span>
                                             <span className="truncate">{country.name === 'All' ? 'All Countries' : country.name}</span>
                                         </div>
                                         <span className={cn(
@@ -281,9 +286,10 @@ export function Sidebar({ channels, selectedChannel, onSelectChannel, favoriteId
                     <div className="pt-2 pb-6 px-2">
                         <button
                             onClick={() => setLimit((l) => l + 50)}
-                            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#3A0CA3] to-[#F72585] text-white font-bold text-sm shadow-[0_0_15px_#3A0CA3aa] hover:shadow-[0_0_25px_#F72585aa] hover:scale-[1.02] transition-all duration-300"
+                            className="w-full py-2.5 rounded-lg border border-[#A29BFE]/20 hover:border-[#F72585]/50 bg-transparent hover:bg-[#F72585]/5 text-[#A29BFE] hover:text-white transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2 group"
                         >
-                            Load More Channels
+                            <span>Load More Channels</span>
+                            <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
                         </button>
                     </div>
                 )}

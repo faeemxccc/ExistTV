@@ -229,7 +229,7 @@ export function Player({ url }: PlayerProps) {
             {/* Modern Glass Controls */}
             <div
                 className={cn(
-                    "absolute bottom-0 left-0 right-0 p-6 transition-all duration-500 bg-gradient-to-t from-black/90 via-black/50 to-transparent",
+                    "absolute bottom-0 left-0 right-0 p-3 md:p-6 transition-all duration-500 bg-gradient-to-t from-black/90 via-black/50 to-transparent",
                     showControls ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
                 )}
                 onMouseEnter={() => setIsHoveringControls(true)}
@@ -241,7 +241,7 @@ export function Player({ url }: PlayerProps) {
                         <div className="h-full bg-gradient-to-r from-[#F72585] to-[#A29BFE] w-full animate-[shimmer_2s_infinite]" />
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 md:gap-6">
                         <button
                             onClick={togglePlay}
                             className="h-12 w-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#F72585] hover:text-white hover:scale-110 transition-all border border-white/10 backdrop-blur-md group/play"
@@ -253,13 +253,13 @@ export function Player({ url }: PlayerProps) {
                             )}
                         </button>
 
-                        <div className="flex items-center gap-3 group/vol bg-white/5 px-4 py-2 rounded-full border border-white/5 backdrop-blur-md hover:bg-white/10 transition-colors">
+                        <div className="flex items-center gap-3 group/vol bg-white/5 px-2 md:px-4 py-2 rounded-full border border-white/5 backdrop-blur-md hover:bg-white/10 transition-colors">
                             <button onClick={toggleMute} className="text-[#A29BFE] hover:scale-110 transition-transform">
                                 {isMuted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
                             </button>
                             <input
                                 type="range" min="0" max="1" step="0.1" value={isMuted ? 0 : volume} onChange={handleVolumeChange}
-                                className="w-24 h-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[#F72585] hover:accent-[#A29BFE]"
+                                className="w-20 md:w-24 h-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-[#F72585] hover:accent-[#A29BFE] hidden sm:block"
                             />
                         </div>
 

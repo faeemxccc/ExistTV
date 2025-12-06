@@ -41,12 +41,11 @@ export function Dashboard({ initialChannels }: DashboardProps) {
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-screen w-screen bg-[#0F0E17] text-[#EAEAEA] overflow-hidden">
-
-            {/* Main Content - Mobile: Order 1 (Top), Desktop: Order 2 (Right) */}
-            <main className="flex-1 flex flex-col h-full relative transition-all duration-300 order-1 md:order-2 overflow-hidden">
+        <div className="flex flex-col md:flex-row h-[100dvh] w-screen bg-[#0F0E17] text-[#EAEAEA] overflow-hidden">
+            {/* Main Content - Mobile: Top (Player), Desktop: Right (Player) */}
+            <main className="flex-none md:flex-1 flex flex-col relative transition-all duration-300 order-1 md:order-2">
                 {/* Topbar */}
-                <header className="h-16 flex-shrink-0 flex items-center px-4 justify-between border-b border-[#A29BFE]/20 bg-[#0F0E17]/80 backdrop-blur-md z-30">
+                <header className="h-14 md:h-16 flex-shrink-0 flex items-center px-4 justify-between border-b border-[#A29BFE]/20 bg-[#0F0E17]/80 backdrop-blur-md z-30">
                     <div className="flex items-center gap-2 md:hidden">
                         <img src="/logo.svg" className="h-6 w-6" alt="ExistTV" />
                         <span className="font-bold bg-gradient-to-r from-[#F72585] to-[#A29BFE] bg-clip-text text-transparent">ExistTV</span>
@@ -59,22 +58,27 @@ export function Dashboard({ initialChannels }: DashboardProps) {
                     <div className="w-10"></div> {/* Spacer for balance */}
                 </header>
 
-                {/* Player Area - Reduced padding for mobile */}
-                <div className="flex-1 flex items-center justify-center bg-black/40 overflow-y-auto p-0 md:p-6">
-                    {selectedChannel ? (
-                        <div className="w-full max-w-5xl aspect-video md:rounded-xl shadow-[0_0_50px_rgba(58,12,163,0.3)] shadow-[#3A0CA3]/30">
+                {/* Player Area */}
+                {/* Mobile: fit content (aspect ratio usually handles it) - Desktop: fill remaining space */}
+                <div className="w-full bg-black/40 flex items-center justify-center p-0 md:p-6 md:flex-1 md:overflow-y-auto">
+                    {/* Mobile wrapper to maintain aspect ratio, Desktop fills available space */}
+                    <div className={cn(
+                        "w-full max-w-5xl shadow-[0_0_50px_rgba(58,12,163,0.3)] shadow-[#3A0CA3]/30",
+                        selectedChannel ? "aspect-video md:rounded-xl" : "p-4"
+                    )}>
+                        {selectedChannel ? (
                             <Player key={selectedChannel.id} url={selectedChannel.url} />
-                        </div>
-                    ) : (
-                        <div className="text-center text-gray-500 animate-pulse p-4">
-                            <p className="text-xl">Waiting for signal...</p>
-                            <p className="text-sm mt-2">Choose a channel from the list</p>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="text-center text-gray-500 animate-pulse py-8 md:py-0">
+                                <p className="text-xl">Waiting for signal...</p>
+                                <p className="text-sm mt-2">Choose a channel from the list</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </main>
 
-            {/* Sidebar - Mobile: Order 2 (Bottom), Desktop: Order 1 (Left) */}
+            {/* Sidebar - Mobile: Bottom (Fill), Desktop: Left (Fixed width) */}
             <Sidebar
                 channels={initialChannels}
                 selectedChannel={selectedChannel}
@@ -83,7 +87,7 @@ export function Dashboard({ initialChannels }: DashboardProps) {
                 }}
                 favoriteIds={favoriteIds}
                 onToggleFavorite={toggleFavorite}
-                className="order-2 md:order-1 md:border-r border-[#A29BFE]/20"
+                className="order-2 md:order-1 md:border-r border-[#A29BFE]/20 flex-1 md:flex-none min-h-0"
             />
         </div>
     );
