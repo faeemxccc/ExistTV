@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { Tv, Shield, Globe, Zap, Info, ChevronRight, Terminal } from 'lucide-react';
+import { Tv, Shield, Globe, Zap, Info, ChevronRight, Terminal, Github } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
@@ -15,12 +15,23 @@ export default function LandingPage() {
               ExistTV
             </span>
           </div>
-          <Link
-            href="/watch"
-            className="group px-6 py-2 bg-[#3A0CA3] hover:bg-[#480fb8] text-white text-sm font-bold rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(58,12,163,0.5)] hover:shadow-[0_0_20px_rgba(58,12,163,0.7)] flex items-center gap-2"
-          >
-            Launch App <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/faeemxccc/ExistTV"
+              target="_blank"
+              rel="noreferrer"
+              className="p-2 text-[#EAEAEA]/80 hover:text-[#F72585] transition-colors"
+              aria-label="GitHub Repository"
+            >
+              <Github className="h-6 w-6" />
+            </a>
+            <Link
+              href="/watch"
+              className="group px-6 py-2 bg-[#3A0CA3] hover:bg-[#480fb8] text-white text-sm font-bold rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(58,12,163,0.5)] hover:shadow-[0_0_20px_rgba(58,12,163,0.7)] flex items-center gap-2"
+            >
+              Launch App <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
         </div>
       </nav>
 

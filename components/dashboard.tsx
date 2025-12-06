@@ -60,7 +60,7 @@ export function Dashboard({ initialChannels }: DashboardProps) {
 
                 {/* Player Area */}
                 {/* Mobile: fit content (aspect ratio usually handles it) - Desktop: fill remaining space */}
-                <div className="w-full bg-black/40 flex items-center justify-center p-0 md:p-6 md:flex-1 md:overflow-y-auto">
+                <div className="w-full bg-black/40 flex items-center justify-center p-0 md:p-6 md:flex-1 overflow-hidden">
                     {/* Mobile wrapper to maintain aspect ratio, Desktop fills available space */}
                     <div className={cn(
                         "w-full max-w-5xl shadow-[0_0_50px_rgba(58,12,163,0.3)] shadow-[#3A0CA3]/30",
