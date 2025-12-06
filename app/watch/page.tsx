@@ -2,11 +2,11 @@
 import { Dashboard } from '@/components/dashboard';
 import { parseM3U } from '@/utils/m3u-parser';
 
-export const revalidate = 3600; // Cache for 1 hour
+export const revalidate = 86400; // Cache for 24 hours
 
 async function getChannels() {
     try {
-        const res = await fetch('https://iptv-org.github.io/iptv/index.category.m3u');
+        const res = await fetch('https://iptv-org.github.io/iptv/index.category.m3u', { next: { revalidate: 86400 } });
         if (!res.ok) throw new Error('Failed to fetch playlist');
         const text = await res.text();
         const channels = parseM3U(text, 'category'); // Default implicit, but nice to be explicit
