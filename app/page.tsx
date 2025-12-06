@@ -17,9 +17,9 @@ export default function LandingPage() {
           </div>
           <Link
             href="/watch"
-            className="px-6 py-2 bg-[#3A0CA3] hover:bg-[#F72585] text-white text-sm font-bold rounded-full transition-all duration-300 shadow-[0_0_15px_#3A0CA3aa] hover:shadow-[0_0_25px_#F72585aa] flex items-center gap-2"
+            className="group px-6 py-2 bg-[#3A0CA3] hover:bg-[#480fb8] text-white text-sm font-bold rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(58,12,163,0.5)] hover:shadow-[0_0_20px_rgba(58,12,163,0.7)] flex items-center gap-2"
           >
-            Launch App <ChevronRight className="h-4 w-4" />
+            Launch App <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </nav>
@@ -53,13 +53,13 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
               href="/watch"
-              className="px-8 py-4 bg-[#F72585] text-white text-lg font-bold rounded-xl hover:scale-105 transition-transform shadow-[0_0_30px_#F7258566] w-full sm:w-auto"
+              className="px-8 py-4 bg-gradient-to-r from-[#F72585] to-[#B5179E] text-white text-lg font-bold rounded-xl hover:brightness-110 transition-all duration-300 shadow-[0_0_20px_rgba(247,37,133,0.3)] hover:shadow-[0_0_30px_rgba(247,37,133,0.5)] w-full sm:w-auto"
             >
               Start Watching Now 📺
             </Link>
             <Link
               href="#docs"
-              className="px-8 py-4 bg-[#FFFFFF]/5 border border-[#FFFFFF]/10 text-[#EAEAEA] text-lg font-medium rounded-xl hover:bg-[#FFFFFF]/10 transition-colors w-full sm:w-auto"
+              className="px-8 py-4 bg-white/5 border border-white/5 backdrop-blur-md text-[#EAEAEA] text-lg font-medium rounded-xl hover:bg-white/10 transition-colors w-full sm:w-auto"
             >
               Read Docs 📖
             </Link>
