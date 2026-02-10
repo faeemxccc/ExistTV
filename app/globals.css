@@ -258,15 +258,15 @@ body {
 
 @keyframes shimmer {
   0% {
-    opacity: 0.03;
-  }
-
-  50% {
     opacity: 0.08;
   }
 
+  50% {
+    opacity: 0.18;
+  }
+
   100% {
-    opacity: 0.03;
+    opacity: 0.08;
   }
 }
 
@@ -274,12 +274,12 @@ body {
 
   0%,
   100% {
-    opacity: 0.04;
+    opacity: 0.10;
     transform: scale(1);
   }
 
   50% {
-    opacity: 0.1;
+    opacity: 0.22;
     transform: scale(1.1);
   }
 }
@@ -294,13 +294,13 @@ body {
 
 .icon-pattern-item {
   position: absolute;
-  opacity: 0.04;
+  opacity: 0.12;
   color: var(--fg);
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .icon-pattern-item:hover {
-  opacity: 0.15 !important;
+  opacity: 0.3 !important;
 }
 
 .icon-pattern-item.float-slow {

@@ -211,12 +211,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 animate-bounce opacity-50">
-        <div className="w-6 h-10 rounded-full border-2 border-fg/30 flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-fg/50 rounded-full animate-pulse" />
-        </div>
-      </div>
+
 
       {/* Footer */}
       <footer className="relative z-10 p-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-muted animate-in delay-3">
