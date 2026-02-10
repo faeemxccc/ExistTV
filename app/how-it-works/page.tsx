@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, ArrowRight, Play, Search, Tv, Wifi, Heart, Settings, Globe, Zap, Shield, Check } from 'lucide-react';
 
 export default function HowItWorksPage() {
@@ -11,7 +12,7 @@ export default function HowItWorksPage() {
                     <span className="text-sm">Back</span>
                 </Link>
                 <Link href="/" className="flex items-center gap-2">
-                    <img src="/logo.svg" className="h-6 w-6" alt="" />
+                    <Image src="/logo.svg" width={24} height={24} className="h-6 w-6" alt="ExistTV" />
                     <span className="font-semibold">ExistTV</span>
                 </Link>
                 <Link
@@ -222,7 +223,7 @@ export default function HowItWorksPage() {
             <footer className="py-8 px-6 border-t border-border">
                 <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted">
                     <div className="flex items-center gap-2">
-                        <img src="/logo.svg" className="h-5 w-5" alt="" />
+                        <Image src="/logo.svg" width={20} height={20} className="h-5 w-5" alt="ExistTV" />
                         <span>ExistTV</span>
                     </div>
                     <div className="flex items-center gap-4">

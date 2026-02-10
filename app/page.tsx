@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight, Github, Tv, Radio, Film, Music, Gamepad2,
   Mic2, Video, Wifi, Play, Headphones, MonitorPlay, Satellite,
@@ -126,7 +127,7 @@ export default function LandingPage() {
       {/* Floating Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between animate-in">
         <Link href="/" className="flex items-center gap-2.5 group magnetic">
-          <img src="/logo.svg" className="h-7 w-7 transition-transform group-hover:scale-110" alt="" />
+          <Image src="/logo.svg" width={28} height={28} className="h-7 w-7 transition-transform group-hover:scale-110" alt="ExistTV" />
           <span className="text-base font-semibold group-hover:opacity-70 transition-fast">ExistTV</span>
         </Link>
 
